@@ -19,7 +19,7 @@ class Originator(Node):
             return
 
         # Pick a recipient
-        recipient_id = self.recipient_ids[self.packet_index % len(self.recipient_ids)]
+        recipient_id = self.recipient_ids[(self.packet_index * 13) % len(self.recipient_ids)]
         recipient = self.network.recipient_by_id(recipient_id)
 
         # Pick a symbol index

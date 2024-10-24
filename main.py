@@ -35,19 +35,20 @@ def run_simulation():
         network.tick()
 
         if network.tick_count % 1000 == 0:
-            print(f"Tick {network.tick_count}")
+            completed_recipients = sum(1 for recipient in recipients if recipient.completed)
+            print(f"{network.tick_count/1000}s: {completed_recipients}/{len(recipients)} {len(network.packets_in_transit)}")
         
-        if network.tick_count > 30000:
-            break   
+# cProfile.run('run_simulation()', 'output.prof')
 
-cProfile.run('run_simulation()', 'output.prof')
+# with open('output_stats.txt', 'w') as stream:
+#     stats = pstats.Stats('output.prof', stream=stream)
+#     stats.sort_stats('cumulative')
+#     stats.print_stats()
 
-with open('output_stats.txt', 'w') as stream:
-    stats = pstats.Stats('output.prof', stream=stream)
-    stats.sort_stats('cumulative')
-    stats.print_stats()
+run_simulation()
 
 # Log the number of nodes that received all symbols
 completed_recipients = sum(1 for recipient in recipients if recipient.completed)
-print(f"Simulation complete after {network.tick_count}ms. {completed_recipients}/{len(recipients)} recipients received all symbols.")
+print(f"Simulation complete: {network.tick_count/1000}s. {completed_recipients}/{len(recipients)} recipients received all symbols.")
 print(f"Total packets sent: {network.total_packets}, required: {args.recipients * args.symbols}, ratio: {network.total_packets / (args.recipients * args.symbols):.2f}")
+print(f"Packets from originator: {originator.packet_index}, ratio: {originator.packet_index / args.symbols:.2f}")

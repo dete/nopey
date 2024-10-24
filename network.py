@@ -61,8 +61,7 @@ class Network:
 
         self.originator.tick()
         for recipient in self.recipients:
-            if recipient.inbox: # Only tick if there are packets to process
-                recipient.tick()
+            recipient.tick()
         
         #self.log(f"Packet counts: {[f'{node.nodeID}: {count}' for node, count in self.packet_counts.items()]}")
 
