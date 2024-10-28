@@ -36,7 +36,7 @@ def run_simulation():
 
         if network.tick_count % 1000 == 0:
             completed_recipients = sum(1 for recipient in recipients if recipient.completed)
-            print(f"{network.tick_count/1000}s: {completed_recipients}/{len(recipients)} {len(network.packets_in_transit)}")
+            print(f"{network.tick_count/1000}s: {completed_recipients}/{len(recipients)} {len(network.codewords_in_transit)}")
         
 # cProfile.run('run_simulation()', 'output.prof')
 
@@ -50,5 +50,5 @@ run_simulation()
 # Log the number of nodes that received all symbols
 completed_recipients = sum(1 for recipient in recipients if recipient.completed)
 print(f"Simulation complete: {network.tick_count/1000}s. {completed_recipients}/{len(recipients)} recipients received all symbols.")
-print(f"Total packets sent: {network.total_packets}, required: {args.recipients * args.symbols}, ratio: {network.total_packets / (args.recipients * args.symbols):.2f}")
-print(f"Packets from originator: {originator.packet_index}, ratio: {originator.packet_index / args.symbols:.2f}")
+print(f"Total codewords sent: {network.total_codewords}, required: {args.recipients * args.symbols}, ratio: {network.total_codewords / (args.recipients * args.symbols):.2f}")
+print(f"Codewords from originator: {originator.codeword_index}, ratio: {originator.codeword_index / args.symbols:.2f}")

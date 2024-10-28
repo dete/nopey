@@ -7,10 +7,10 @@ class Network:
         self.originator = originator
         self.recipients = recipients
         self.recipient_lookup = {recipient.nodeID: recipient for recipient in recipients}
-        self.packets_in_transit = []  # List to store packets and their delivery tick
-        self.packet_counts = {recipient: 0 for recipient in recipients}  # Track packet counts per recipient
+        self.codewords_in_transit = []
+        self.codeword_counts = {recipient: 0 for recipient in recipients}
         self.tick_count = 0  # Initialize tick count
-        self.total_packets = 0
+        self.total_codewords = 0  #
 
         # Set the network reference for the originator and recipients
         self.originator.set_network(self)
@@ -21,60 +21,57 @@ class Network:
         for node in [self.originator] + self.recipients:
             node.initialize()
 
-    def send(self, packet):
+    def send(self, codeword):  # Renamed parameter
         # Look up the latency between the source and destination
-        latency = latency_table[packet.source.city][packet.destination.city]
+        latency = latency_table[codeword.source.city][codeword.destination.city]
 
         # Calculate the delivery tick
         delivery_tick = self.tick_count + latency
 
-        # Insert the packet into the sorted list
-        self.insert_packet(packet, delivery_tick)
+        # Insert the codeword into the sorted list
+        self.insert_codeword(codeword, delivery_tick)  # Renamed method call
 
-        # Increment the packet count for the destination if it's a recipient
-        if packet.destination in self.packet_counts:
-            self.packet_counts[packet.destination] += 1
+        # Increment the codeword count for the destination if it's a recipient
+        if codeword.destination in self.codeword_counts:
+            self.codeword_counts[codeword.destination] += 1
 
-        self.total_packets += 1
+        self.total_codewords += 1
     
-    def insert_packet(self, packet, delivery_tick):
-        # Binary search to find the correct position to insert the packet
-        left, right = 0, len(self.packets_in_transit)
+    def insert_codeword(self, codeword, delivery_tick):
+        # Binary search to find the correct position to insert the codeword
+        left, right = 0, len(self.codewords_in_transit)
         while left < right:
             mid = (left + right) // 2
-            if self.packets_in_transit[mid][1] > delivery_tick:
+            if self.codewords_in_transit[mid][1] > delivery_tick:
                 left = mid + 1
             else:
                 right = mid
-        self.packets_in_transit.insert(left, (packet, delivery_tick))
+        self.codewords_in_transit.insert(left, (codeword, delivery_tick))
     
     def tick(self):
         self.tick_count += 1  # Increment tick count
 
-        # Deliver packets scheduled for this tick
-        while self.packets_in_transit and self.packets_in_transit[-1][1] <= self.tick_count:
-            packet, _ = self.packets_in_transit.pop()
-            packet.destination.receive_message(packet)
-            # Decrement the packet count for the destination if it's a recipient
-            if packet.destination in self.packet_counts:
-                self.packet_counts[packet.destination] -= 1
+        # Deliver codewords scheduled for this tick
+        while self.codewords_in_transit and self.codewords_in_transit[-1][1] <= self.tick_count:
+            codeword, _ = self.codewords_in_transit.pop()
+            codeword.destination.receive_codeword(codeword)  # Method name needs to be updated in Node class
+            if codeword.destination in self.codeword_counts:
+                self.codeword_counts[codeword.destination] -= 1
 
         self.originator.tick()
         for recipient in self.recipients:
             recipient.tick()
-        
-        #self.log(f"Packet counts: {[f'{node.nodeID}: {count}' for node, count in self.packet_counts.items()]}")
 
     def active(self):
         # Check if the originator's complete flag is set
         if not self.originator.completed:
             return True
 
-        # Check if there are any packets in transit
-        if self.packets_in_transit:
+        # Check if there are any codewords in transit
+        if self.codewords_in_transit:
             return True
 
-        # Check if there are any packets in any node's inbox
+        # Check if there are any codewords in any node's inbox
         for node in [self.originator] + self.recipients:
             if node.inbox:
                 return True
@@ -90,7 +87,7 @@ class Network:
 
     def __repr__(self):
         return (f"Network(tick_count={self.tick_count}, "
-                f"packets_in_transit={len(self.packets_in_transit)}, "
+                f"codewords_in_transit={len(self.codewords_in_transit)}, "
                 f"originator_completed={self.originator.completed}, "
                 f"recipients_completed={[recipient.completed for recipient in self.recipients]}, "
-                f"total_packets={self.total_packets})")
+                f"total_codewords={self.total_codewords})")

@@ -5,8 +5,8 @@ class Node:
         self.inbox = []
         self.network = None  # New member variable for Network instance
 
-    def receive_message(self, packet):
-        self.inbox.append(packet)
+    def receive_codeword(self, codeword):
+        self.inbox.append(codeword)
 
     def tick(self):
         # Define behavior for each tick
