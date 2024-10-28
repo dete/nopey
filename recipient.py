@@ -34,7 +34,7 @@ class Recipient(Node):
                 # Send a codeword with an empty symbol list back to the originator
                 response_codeword = Codeword(source=self, destination=self.network.originator, symbols=[])
                 self.network.send(response_codeword)
-                self.network.log(f"Node {self.nodeID} complete after {len(self.decoder.vectors)} codewords")
+                self.network.log(f"Node {self.nodeID} complete after {self.decoder.matrix.shape()[0]} codewords")
 
     def tick(self):
         # Process an incoming codeword first. If there are none, forward a single codeword

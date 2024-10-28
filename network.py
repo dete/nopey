@@ -54,7 +54,8 @@ class Network:
         # Deliver codewords scheduled for this tick
         while self.codewords_in_transit and self.codewords_in_transit[-1][1] <= self.tick_count:
             codeword, _ = self.codewords_in_transit.pop()
-            codeword.destination.receive_codeword(codeword)  # Method name needs to be updated in Node class
+            codeword.destination.receive_codeword(codeword)
+            # Decrement the codeword count for the destination if it's a recipient
             if codeword.destination in self.codeword_counts:
                 self.codeword_counts[codeword.destination] -= 1
 
