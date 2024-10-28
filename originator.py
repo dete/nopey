@@ -22,11 +22,12 @@ class Originator(Node):
         recipient_id = self.recipient_ids[(self.codeword_index * 13) % len(self.recipient_ids)]
         recipient = self.network.recipient_by_id(recipient_id)
 
-        # Pick a symbol index
-        symbol_index = self.codeword_index % self.symbol_count
+        # Create a random set of symbols if not already created
+        symbol_count = random.randint(1, self.symbol_count)
+        symbol_set = random.sample(range(self.symbol_count), symbol_count)
 
         # Create a codeword with the selected symbol index
-        codeword = Codeword(source=self, destination=recipient, symbols=[symbol_index])
+        codeword = Codeword(source=self, destination=recipient, symbols=symbol_set)
 
         # Send the codeword through the network
         self.network.send(codeword)

@@ -2,13 +2,14 @@
 from node import Node
 import config
 from codeword import Codeword  # Updated import
+from decoder import Decoder
 import random
 
 class Recipient(Node):
     def __init__(self, city, nodeID, total_symbols):
         super().__init__(city, nodeID)
         self.total_symbols = total_symbols
-        self.seen_symbols = set()  # Track seen symbols
+        self.decoder = Decoder(total_symbols)
         self.completed = False  # Flag to track if completion codeword has been sent
         self.codewords_to_forward = []
 
@@ -17,15 +18,8 @@ class Recipient(Node):
 
     def process_codeword(self, codeword):
         if not self.completed:
-            previously_seen = len(self.seen_symbols)
 
-            for symbol in codeword.symbols:
-                self.seen_symbols.add(symbol)
-
-            # If we've seen all the symbols before, don't forward the codeword
-            if previously_seen == len(self.seen_symbols):
-                return
-
+            # Queue up codewords to forward to downstream recipients
             if codeword.source == self.network.originator:
                 my_index = self.network.recipients.index(self)
 
@@ -34,17 +28,16 @@ class Recipient(Node):
                     downstream_codeword = Codeword(source=self, destination=recipient, symbols=codeword.symbols)
                     self.codewords_to_forward.append(downstream_codeword)
 
-            # Check if all symbols have been seen and completion codeword hasn't been sent
-            if len(self.seen_symbols) == self.total_symbols:
-                self.completed = True  # Set the flag to indicate completion codeword has been sent
-
+            # Check if all symbols have been seen and send a response codeword to tell the originator I'm done
+            self.completed = self.decoder.process_codeword(codeword)
+            if self.completed:
                 # Send a codeword with an empty symbol list back to the originator
                 response_codeword = Codeword(source=self, destination=self.network.originator, symbols=[])
                 self.network.send(response_codeword)
-                self.network.log(f"Node {self.nodeID} received all symbols")
+                self.network.log(f"Node {self.nodeID} complete after {len(self.decoder.vectors)} codewords")
 
     def tick(self):
-        # Customizable logic for processing received codewords
+        # Process an incoming codeword first. If there are none, forward a single codeword
         if self.inbox:
             codeword = self.inbox.pop(0)
             self.process_codeword(codeword)
