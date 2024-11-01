@@ -23,8 +23,8 @@ class Recipient(Node):
             if codeword.source == self.network.originator:
                 my_index = self.network.recipients.index(self)
 
-                for i in range(len(self.network.recipients)):
-                    recipient = self.network.recipients[i % len(self.network.recipients)]
+                for i in range(len(self.network.recipients)-1):
+                    recipient = self.network.recipients[(my_index + i) % len(self.network.recipients)]
                     downstream_codeword = Codeword(source=self, destination=recipient, symbols=codeword.symbols)
                     self.codewords_to_forward.append(downstream_codeword)
 

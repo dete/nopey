@@ -19,12 +19,9 @@ args = parser.parse_args()
 # Set the global verbose flag
 config.VERBOSE = args.verbose
 
-def random_city():
-    return cities[random.randint(0, len(cities) - 1)]
-
 # Example setup
-originator = Originator(random_city(), args.symbols)
-recipients = [Recipient(random_city(), i+1, args.symbols) for i in range(args.recipients)]
+originator = Originator(get_random_location(), args.symbols)
+recipients = [Recipient(get_random_location(), i+1, args.symbols) for i in range(args.recipients)]
 
 network = Network(originator, recipients)
 network.initialize()

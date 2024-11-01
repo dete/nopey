@@ -15,7 +15,11 @@ class Decoder:
         # by seeing if adding it increases the rank
 #        old_rank = self.matrix.rank()
         self.matrix.append(vector)
-        new_rank = self.matrix.rank()
+        new_rank = 0
+
+        # If we've added enough vectors to form a basis, calculate the rank
+        if self.matrix.shape()[0] >= self.total_symbols:
+            new_rank = self.matrix.rank()
         
         # If rank didn't increase, this vector was dependent
         # if new_rank == old_rank:

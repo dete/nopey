@@ -19,7 +19,7 @@ class Originator(Node):
             return
 
         # Pick a recipient
-        recipient_id = self.recipient_ids[(self.codeword_index * 13) % len(self.recipient_ids)]
+        recipient_id = self.recipient_ids[(self.codeword_index) % len(self.recipient_ids)]
         recipient = self.network.recipient_by_id(recipient_id)
 
         # Create a random set of symbols if not already created
@@ -34,6 +34,9 @@ class Originator(Node):
 
         # Increment the codeword index
         self.codeword_index += 1
+
+        if self.codeword_index > self.symbol_count * 1.2:
+            self.completed = True
 
     def process_inbox(self):
         while self.inbox:

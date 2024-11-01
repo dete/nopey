@@ -129,3 +129,80 @@ latency_table = {
         "Seoul": 160, "Toronto": 0
     }
 }
+
+import random
+
+def get_random_location():
+    """Returns a random city and cloud provider in the format 'City (XYZ)'"""
+    city = random.choice(cities)
+    provider = random.choice(['AWS', 'GCP', 'AZR'])
+    return f"{city} ({provider})"
+
+def get_latency(location1, location2):
+    """Returns the latency between two locations, accounting for cloud provider differences"""
+    # Extract city names by removing cloud provider suffix
+    city1 = location1.split(" (")[0]
+    city2 = location2.split(" (")[0]
+    
+    # Get base latency from table
+    base_latency = latency_table[city1][city2]
+    
+    # Extract providers
+    provider1 = location1.split("(")[1].rstrip(")")
+    provider2 = location2.split("(")[1].rstrip(")")
+    
+    # Apply latency factor if providers differ
+    latency_factor = 2
+    if provider1 != provider2:
+        return max(base_latency * latency_factor, 10)
+    
+    return base_latency
+
+
+if __name__ == "__main__":
+    # Test random location generation
+    print("Random location examples:")
+    for _ in range(5):
+        print(get_random_location())
+    
+    # Test latency between same providers
+    loc1 = "London (AWS)"
+    loc2 = "NewYork (AWS)" 
+    latency = get_latency(loc1, loc2)
+    print(f"\nLatency between {loc1} and {loc2}: {latency}ms")
+    
+    # Test latency between different providers
+    loc3 = "Tokyo (GCP)"
+    loc4 = "Singapore (AZR)"
+    latency = get_latency(loc3, loc4)
+    print(f"Latency between {loc3} and {loc4}: {latency}ms")
+    
+    # Verify symmetry
+    loc5 = "Dubai (AWS)"
+    loc6 = "Mumbai (AWS)"
+    latency1 = get_latency(loc5, loc6)
+    latency2 = get_latency(loc6, loc5)
+    print(f"\nVerifying symmetry:")
+    print(f"{loc5} -> {loc6}: {latency1}ms")
+    print(f"{loc6} -> {loc5}: {latency2}ms")
+    assert latency1 == latency2, "Latency should be symmetric"
+
+    # Test triangle inequality with same city, different providers
+    loc7 = "London (GCP)"
+    loc8 = "London (AWS)"
+    loc9 = "Tokyo (AWS)"
+    
+    # Get latencies between all pairs
+    latency_same_city = get_latency(loc7, loc8)  # London-London different providers
+    latency_aws = get_latency(loc8, loc9)        # London-Tokyo same provider
+    latency_mixed = get_latency(loc7, loc9)      # London-Tokyo different providers
+    
+    print(f"\nTesting triangle inequality:")
+    print(f"{loc7} -> {loc8}: {latency_same_city}ms")
+    print(f"{loc7} -> {loc9}: {latency_aws}ms") 
+    print(f"{loc8} -> {loc9}: {latency_mixed}ms")
+    print(f"Direct: {latency_mixed}ms")
+    print(f"Bounced: {latency_same_city + latency_aws}ms")
+    if latency_mixed > latency_same_city + latency_aws:
+        print("Triangle inequality violated")
+

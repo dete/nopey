@@ -23,7 +23,7 @@ class Network:
 
     def send(self, codeword):  # Renamed parameter
         # Look up the latency between the source and destination
-        latency = latency_table[codeword.source.city][codeword.destination.city]
+        latency = get_latency(codeword.source.city, codeword.destination.city)
 
         # Calculate the delivery tick
         delivery_tick = self.tick_count + latency
